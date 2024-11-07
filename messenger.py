@@ -46,11 +46,9 @@ def affichage_membre_groupe():
             ids= g['member_ids']
             for d in server['users']:
                 if d['id'] in ids:
-                    print(d['id'])
-        else :
-            print('unknown group')
-            return None
-        
+                    print(d['name'])
+    #ou placer le else ???? unknown group
+    accueil()
 
 def add_member():
     group = input('Nom du groupe où ajouter:')
@@ -59,7 +57,8 @@ def add_member():
     id_to_add = input('Quel id ajouter :')
     for d in server['channels']:
         if d['name']==group:
-            d['member_ids'].append(id_to_add)
+            d['member_ids'].append(int(id_to_add))
+            print(d['member_ids'])
     else :
         print('Unkonw group')
 
@@ -109,10 +108,38 @@ def new_user():
     server['users'].append({'id': n_id, 'name' : nom})
     accueil()
 
+def message():
+    for users in server['users']:
+        print(users['name'], ":", users['id'])
+    personne_qui_ecrit = input('quel est ton id:')
+    for groupe in server['channels']:
+        print(groupe['name'], ":", groupe['id'])
+    groupe_a_contacter = input('à quel groupe veux-tu écrire (id de groupe):')
+    message_a_ecrire = input('Que veux tu écrire:')
+    n_id = max([mess['id'] for mess in server['messages']])+1
+    server['messages'].append({
+        'id': n_id,
+        'reception_date': datetime.now(),
+        'sender_id': personne_qui_ecrit,
+        'channel': groupe_a_contacter,
+        'content': message_a_ecrire
+    })
+
+
+'messages': [
+    {
+        'id': 1,
+        'reception_date': datetime.now(),
+        'sender_id': 1,
+        'channel': 1,
+        'content': 'Hi 👋'
+    }
+
 def accueil():
     print('=== Messenger ===')
     print('1. See users')
     print('2. See channels')
+    print('3. Send a message')
     print('x. Leave')
     choice = input('Select an option: ')
     if choice == 'x':
@@ -121,6 +148,8 @@ def accueil():
         user_affichage()
     elif choice == '2':
         channels_affichage()
+    elif choice == '3':
+        message()
     else:
         print('Unknown option:', choice)
         return None

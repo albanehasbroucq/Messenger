@@ -25,6 +25,8 @@ server = {
 def leave():
     print('Bye!')
     return None
+def retour_menu():
+    accueil()
 
 def user_affichage():
     print( 'User list :')
@@ -34,7 +36,7 @@ def user_affichage():
     print('x. Main menu')
     choice = input('Select an option: ')
     if choice == 'x':
-        leave()
+        retour_menu()
     elif choice == 'n':
         new_user()
     accueil()
@@ -111,29 +113,21 @@ def new_user():
 def message():
     for users in server['users']:
         print(users['name'], ":", users['id'])
-    personne_qui_ecrit = input('quel est ton id:')
+    sender_id = input('quel est ton id:')
     for groupe in server['channels']:
-        print(groupe['name'], ":", groupe['id'])
+        if int(sender_id) in groupe['member_ids']:
+            print(groupe['name'], ":", groupe['id'])
     groupe_a_contacter = input('à quel groupe veux-tu écrire (id de groupe):')
     message_a_ecrire = input('Que veux tu écrire:')
     n_id = max([mess['id'] for mess in server['messages']])+1
     server['messages'].append({
         'id': n_id,
         'reception_date': datetime.now(),
-        'sender_id': personne_qui_ecrit,
+        'sender_id': sender_id,
         'channel': groupe_a_contacter,
         'content': message_a_ecrire
     })
-
-
-'messages': [
-    {
-        'id': 1,
-        'reception_date': datetime.now(),
-        'sender_id': 1,
-        'channel': 1,
-        'content': 'Hi 👋'
-    }
+    accueil()
 
 def accueil():
     print('=== Messenger ===')

@@ -31,7 +31,9 @@ def affichage_membre_groupe():
             for d in server['users']:
                 if d['id'] in ids:
                     print(d['name'])
+
     #ou placer le else ???? unknown group
+    #--> focntionne pas 
     accueil()
 
 def add_member():
@@ -45,7 +47,7 @@ def add_member():
             print(d['member_ids'])
     else :
         print('Unkonw group')
-
+    save_server()
     accueil()
 
 
@@ -60,6 +62,7 @@ def create_channel():
                 liste_membres_id.append(d['id'])
     n_id = max([d['id'] for d in server['channels']])+1
     server['channels'].append({'id':n_id, 'name': name_group, 'member_ids': liste_membres_id})
+    save_server()
     accueil()
 
 
@@ -89,6 +92,7 @@ def new_user():
     nom = input('Choisir un nom:')
     n_id = max([d['id'] for d in server['users']])+1
     server['users'].append({'id': n_id, 'name' : nom})
+    save_server()
     accueil()
 
 def send_message():
@@ -103,11 +107,13 @@ def send_message():
     n_id = max([mess['id'] for mess in server['messages']])+1
     server['messages'].append({
         'id': n_id,
-        'reception_date': datetime.now(),
-        'sender_id': sender_id,
-        'channel': groupe_a_contacter,
+        'reception_date': '11:46, 07/11/2024',
+        'sender_id': int(sender_id),
+        'channel': int(groupe_a_contacter),
         'content': message_a_ecrire
     })
+    print(server['messages'])
+    save_server()
     accueil()
 
 def read_message():
@@ -118,13 +124,16 @@ def read_message():
         if int(sender_id) in groupe['member_ids']:
             print(groupe['name'], ":", groupe['id'])
     groupe_a_consulter = input('Les messages de quel groupe veux-tu voir (id de groupe):')
+    for groupe in server['channels']:
+        if groupe['id'] == int(groupe_a_consulter):
+            print(groupe['name'],':')
     for mess in server['messages']:
+        #if mess['channel']== int(groupe_a_consulter):
+            #for id in mess['id']:
+            #    print 
         if mess['channel']== int(groupe_a_consulter):
-            for groupe in server['channels']:
-                if groupe['id'] == int(groupe_a_consulter):
-                    print(groupe['name'],':')
             for user in server['users']:
-                if user['id']== int(sender_id):
+                if user['id']== mess['sender_id']:
                     print(user['name'], ':', mess['content'])
     print('----------------------')
     print('3. Send a message')
@@ -159,9 +168,9 @@ def accueil():
         print('Unknown option:', choice)
         return None
 
-with open('server-data.json', 'w') as fichier:
-    # Écrit le dictionnaire dans le fichier JSON
-    json.dump(server, fichier, indent=4, ensure_ascii=False)
+def save_server():
+    with open('server-data.json', 'w') as fichier:
+        json.dump(server, fichier, indent=4, ensure_ascii=False)
 
 accueil()
-
+ 

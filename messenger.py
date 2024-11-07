@@ -1,26 +1,8 @@
 from datetime import datetime
+import json
 
-server = {
-    'users': [
-        {'id': 1, 'name': 'Alice'},
-        {'id': 2, 'name': 'Bob'},
-        {'id': 3, 'name': 'Third user'},
-        {'id': 4, 'name': '4'},
-        {'id': 5, 'name':'5 u'}
-    ],
-    'channels': [
-        {'id': 1, 'name': 'Town square', 'member_ids': [1, 2]}
-    ],
-    'messages': [
-        {
-            'id': 1,
-            'reception_date': datetime.now(),
-            'sender_id': 1,
-            'channel': 1,
-            'content': 'Hi 👋'
-        }
-    ]
-}
+with open('server-data.json', 'r') as fichier:
+    server = json.load(fichier)
 
 def leave():
     print('Bye!')
@@ -67,7 +49,6 @@ def add_member():
     accueil()
 
 
-
 def create_channel():
     name_group = input('Choose a name of group:')
     members = input('Give the members of the group:')
@@ -110,7 +91,7 @@ def new_user():
     server['users'].append({'id': n_id, 'name' : nom})
     accueil()
 
-def message():
+def send_message():
     for users in server['users']:
         print(users['name'], ":", users['id'])
     sender_id = input('quel est ton id:')
@@ -129,11 +110,39 @@ def message():
     })
     accueil()
 
+def read_message():
+    for users in server['users']:
+        print(users['name'], ":", users['id'])
+    sender_id = input('quel est ton id:')
+    for groupe in server['channels']:
+        if int(sender_id) in groupe['member_ids']:
+            print(groupe['name'], ":", groupe['id'])
+    groupe_a_consulter = input('Les messages de quel groupe veux-tu voir (id de groupe):')
+    for mess in server['messages']:
+        if mess['channel']== int(groupe_a_consulter):
+            for groupe in server['channels']:
+                if groupe['id'] == int(groupe_a_consulter):
+                    print(groupe['name'],':')
+            for user in server['users']:
+                if user['id']== int(sender_id):
+                    print(user['name'], ':', mess['content'])
+    print('----------------------')
+    print('3. Send a message')
+    print('x. Main menu')
+    choice = input('Select an option: ')
+    if choice == '3':
+        send_message()
+    elif choice == 'x':
+        retour_menu()
+    else: 
+        leave()
+
 def accueil():
     print('=== Messenger ===')
     print('1. See users')
     print('2. See channels')
     print('3. Send a message')
+    print('4. See messages')
     print('x. Leave')
     choice = input('Select an option: ')
     if choice == 'x':
@@ -143,11 +152,16 @@ def accueil():
     elif choice == '2':
         channels_affichage()
     elif choice == '3':
-        message()
+       send_message()
+    elif choice == '4':
+        read_message()
     else:
         print('Unknown option:', choice)
         return None
 
+with open('server-data.json', 'w') as fichier:
+    # Écrit le dictionnaire dans le fichier JSON
+    json.dump(server, fichier, indent=4, ensure_ascii=False)
 
 accueil()
 

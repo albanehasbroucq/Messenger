@@ -1,0 +1,63 @@
+{
+    "users": [
+        {
+            "id": 1,
+            "name": "Alice"
+        },
+        {
+            "id": 2,
+            "name": "Bob"
+        },
+        {
+            "id": 3,
+            "name": "Third user"
+        },
+        {
+            "id": 4,
+            "name": "4"
+        },
+        {
+            "id": 5,
+            "name": "5 u"
+        },
+        {
+            "id": 6,
+            "name": "Albane"
+        }
+    ],
+    "channels": [
+        {
+            "id": 1,
+            "name": "Town square",
+            "member_ids": [
+                1,
+                2
+            ]
+        },
+        {
+            "id": 2,
+            "name": "Collègues",
+            "member_ids": [
+                6,
+                1,
+                2
+            ]
+        }
+    ],
+    "messages": [
+        {
+            "id": 1,
+            "reception_date": "11:06, 07/11/2024",
+            "sender_id": 1,
+            "channel": 1,
+            "content": "Hi 👋"
+        },
+        {
+            "id": 2,
+            "reception_date": "11:46, 07/11/2024",
+            "sender_id": 1,
+            "channel": 1,
+            "content": "Hello ??"
+        }
+    ]
+}

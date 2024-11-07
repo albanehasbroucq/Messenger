@@ -31,9 +31,6 @@ def affichage_membre_groupe():
             for d in server['users']:
                 if d['id'] in ids:
                     print(d['name'])
-
-    #ou placer le else ???? unknown group
-    #--> focntionne pas 
     accueil()
 
 def add_member():

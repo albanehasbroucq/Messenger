@@ -34,16 +34,19 @@ def affichage_membre_groupe():
     accueil()
 
 def add_member():
-    group = input('Nom du groupe où ajouter:')
-    for d in server['users']:
-        print(d['name'], ":", d['id'])
+    matching_groups = []
+    while len(matching_groups) == 0:
+        group_name = input('Nom du groupe où ajouter:')
+        matching_groups = [group for group in server['channels'] if group['name'] == group_name]
+        if len(matching_groups) == 0:
+            print('Unknown group')
+    group = matching_groups[0]
+    for user in server['users']:
+        if user['id'] not in group['member_ids']:
+            print(user['name'], ":", user['id'])
     id_to_add = input('Quel id ajouter :')
-    for d in server['channels']:
-        if d['name']==group:
-            d['member_ids'].append(int(id_to_add))
-            print(d['member_ids'])
-    else :
-        print('Unkonw group')
+    group['member_ids'].append(int(id_to_add))
+    print(group['member_ids'])
     save_server()
     accueil()
 

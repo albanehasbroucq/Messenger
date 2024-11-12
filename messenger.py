@@ -1,8 +1,34 @@
 from datetime import datetime
 import json
 
-with open('server-data.json', 'r') as fichier:
-    server = json.load(fichier)
+SERVER_FILE_NAME= 'server-data.json'
+def load_server():
+    with open(SERVER_FILE_NAME) as json_file:
+        server=json.load(json_file)
+        users = [User((user['name'], user['id'])) for user in server['users']]
+        server['users'] = users
+    ## server['users']:list[dict]
+    ## Transform server['users'] en list[User]
+
+    return server
+#with open('server-data.json', 'r') as fichier:
+#    server = json.load(fichier)
+
+server=load_server()
+
+def save_server(server_to_save:dict):
+    json.dump(server_to_save, open(SERVER_FILE_NAME, 'w'))
+
+class User:
+    def __init__(self,id:int, name:str):
+        self.id = id
+        self.name = name
+
+class Channel:
+    def __init__(self,id:int, name:str, member_ids : list):
+        self.id = id
+        self.name = name
+        self.member_ids = member_ids
 
 def leave():
     print('Bye!')
@@ -13,7 +39,7 @@ def retour_menu():
 def user_affichage():
     print( 'User list :')
     for u in server['users']:
-        print((str(u['id']))+'.'+u['name'])
+        print((str(u.id))+'.'+u.name)
     print('n. Create user')
     print('x. Main menu')
     choice = input('Select an option: ')
@@ -28,9 +54,9 @@ def affichage_membre_groupe():
     for g in server['channels']:
         if g['name']==group:
             ids= g['member_ids']
-            for d in server['users']:
-                if d['id'] in ids:
-                    print(d['name'])
+            for u in server['users']:
+                if u.id in ids:
+                    print(u.name)
     accueil()
 
 def add_member():
@@ -42,8 +68,8 @@ def add_member():
             print('Unknown group')
     group = matching_groups[0]
     for user in server['users']:
-        if user['id'] not in group['member_ids']:
-            print(user['name'], ":", user['id'])
+        if user.id not in group['member_ids']:
+            print(user.name, ":", user.id)
     id_to_add = input('Quel id ajouter :')
     group['member_ids'].append(int(id_to_add))
     print(group['member_ids'])
@@ -57,10 +83,10 @@ def create_channel():
     liste_membres_name= members.split(',')
     liste_membres_id=[]
     for name in liste_membres_name :
-        for d in server['users']:
-            if d['name']==name:
-                liste_membres_id.append(d['id'])
-    n_id = max([d['id'] for d in server['channels']])+1
+        for u in server['users']:
+            if u.name == name:
+                liste_membres_id.append(u.id)
+    n_id = max([c['id'] for c in server['channels']])+1
     server['channels'].append({'id':n_id, 'name': name_group, 'member_ids': liste_membres_id})
     save_server()
     accueil()
@@ -90,14 +116,14 @@ def channels_affichage():
 
 def new_user():
     nom = input('Choisir un nom:')
-    n_id = max([d['id'] for d in server['users']])+1
+    n_id = max([u.id for u in server['users']])+1
     server['users'].append({'id': n_id, 'name' : nom})
     save_server()
     accueil()
 
 def send_message():
     for users in server['users']:
-        print(users['name'], ":", users['id'])
+        print(users.name, ":", users.id)
     sender_id = input('quel est ton id:')
     for groupe in server['channels']:
         if int(sender_id) in groupe['member_ids']:
@@ -118,7 +144,7 @@ def send_message():
 
 def read_message():
     for users in server['users']:
-        print(users['name'], ":", users['id'])
+        print(users.name, ":", users.id)
     sender_id = input('quel est ton id:')
     for groupe in server['channels']:
         if int(sender_id) in groupe['member_ids']:
@@ -133,8 +159,8 @@ def read_message():
             #    print 
         if mess['channel']== int(groupe_a_consulter):
             for user in server['users']:
-                if user['id']== mess['sender_id']:
-                    print(user['name'], ':', mess['content'])
+                if user.id == mess['sender_id']:
+                    print(user.name, ':', mess['content'])
     print('----------------------')
     print('3. Send a message')
     print('x. Main menu')
@@ -173,4 +199,3 @@ def save_server():
         json.dump(server, fichier, indent=4, ensure_ascii=False)
 
 accueil()
- 

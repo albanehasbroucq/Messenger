@@ -1,6 +1,6 @@
 from datetime import datetime
 import json
-
+### DÉFINITIONS DES CLASSES :
 class User:
     def __init__(self,id:int, name:str):
         self.id = id
@@ -40,6 +40,7 @@ class Message:
         dict = {'id' : self.id, 'reception_date' : self.reception_date, 'sender_id': self.sender_id, 'channel': self.channel, 'content': self.content}
         return dict
 
+### FICHIER JSON ET CONVERSION: 
 SERVER_FILE_NAME= 'server-data.json'
 def load_server():
     with open(SERVER_FILE_NAME) as json_file:
@@ -62,9 +63,12 @@ def load_server():
 
 server=load_server()
 
+### DÉFINTIIONS DES FONCTIONS UTILES AU SERVER:
+
 def leave():
     print('Bye!')
     return None
+
 def retour_menu():
     accueil()
 
@@ -92,38 +96,32 @@ def affichage_membre_groupe():
     accueil()
 
 def add_member():
-    matching_groups = []
-    while len(matching_groups) == 0:
-        channel_name = input('Nom du groupe où ajouter:')
-        matching_groups = [channel for channel in server['channels'] if channel.name == channel_name]
-        if len(matching_groups) == 0:
-            print('Unknown group')
-    group = matching_groups[0]
-    for user in server['users']:
-        if user.id not in group['member_ids']:
-            print(User(user.id, user.name))
-    id_to_add = input('Quel id ajouter :')
-    group.member_ids.append(int(id_to_add))
-    print(group.member_ids)
-    save_server()
+    channel_id = input('Numéro id du groupe où ajouter:')
+    for channel in server['channels']:
+        if int(channel_id)== channel.id : 
+            for user in server['users']:
+                if user.id not in channel.member_ids:
+                    print(User(user.id, user.name))
+            id_to_add = input('Quel id ajouter :')
+            channel.member_ids.append(int(id_to_add))
+            print(channel)
     accueil()
-
-
+    save_server()
+ 
 def create_channel():
     name_group = input('Choose a name of group:')
-    members = input('Give the members of the group:')
-    liste_membres_name= members.split(',')
-    liste_membres_id=[]
-    for name in liste_membres_name :
-        for u in server['users']:
-            if u.name == name:
-                liste_membres_id.append(u.id)
+    for user in server['users']:
+        print(User(user.id, user.name))
+    members = input('Give the ids you want in the group:')
+    liste_membres_id_str = members.split(',')
+    liste_membres_id = []
+    for id in liste_membres_id_str:
+        liste_membres_id.append(int(id)) 
     n_id = max([c.id for c in server['channels']])+1
     server['channels'].append(Channel(n_id, name_group, liste_membres_id))
+    print(Channel(n_id, name_group, liste_membres_id))
     save_server()
     accueil()
-
-
 
 def channels_affichage():
     for c in server['channels']:
@@ -144,7 +142,6 @@ def channels_affichage():
     else:
         print('Unknown option:', choice)
         return None
-
 
 def new_user():
     nom = input('Choisir un nom:')
@@ -187,7 +184,8 @@ def read_message():
             for user in server['users']:
                 if user.id == mess.sender_id:
                     print(User(user.id ,user.name))
-                    print(Message(mess.id, mess.sender_id, mess.channel, mess.content))
+                    message = Message(mess.id, mess.sender_id, mess.channel, mess.reception_date, mess.content)
+                    print(message)
 
     print('----------------------')
     print('3. Send a message')
@@ -222,8 +220,7 @@ def accueil():
         print('Unknown option:', choice)
         return None
 
-
-
+### ENREGISTREMENT SUR LE SERVER ET CONVERSION JSON-DICT:
 def save_server():
     dic={}
     dic['users'] = [user.to_dict() for user in server['users']]

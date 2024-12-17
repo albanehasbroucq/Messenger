@@ -1,5 +1,13 @@
 from datetime import datetime
 import json
+import argparse
+
+### PASSAGE EN ARGUMENT
+parser = argparse.ArgumentParser()
+parser.add_argument('--server', '-s', help = 'enter json path')
+args = parser.parse_args()
+
+
 ### DÉFINITIONS DES CLASSES :
 class User:
     def __init__(self,id:int, name:str):
@@ -41,7 +49,7 @@ class Message:
         return dict
 
 ### FICHIER JSON ET CONVERSION: 
-SERVER_FILE_NAME= 'server-data.json'
+SERVER_FILE_NAME = args.server
 def load_server():
     with open(SERVER_FILE_NAME) as json_file:
         server=json.load(json_file)
@@ -58,7 +66,7 @@ def load_server():
     ## Transform server['users'] en list[User]
 
     return server
-#with open('server-data.json', 'r') as fichier:
+#with open(args.server, 'r') as fichier:
 #    server = json.load(fichier)
 
 server=load_server()
@@ -230,5 +238,3 @@ def save_server():
         json.dump(dic, fichier, indent=4, ensure_ascii=False)
     
 accueil()
-
-#test

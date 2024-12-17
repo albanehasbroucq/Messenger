@@ -242,6 +242,7 @@ def read_message():
     choice = input('Select an option: ')
     if choice == '3':
         send_message()
+        
     elif choice == 'x':
         retour_menu()
     else: 

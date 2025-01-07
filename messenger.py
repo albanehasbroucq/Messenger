@@ -1,5 +1,7 @@
 from datetime import datetime
 import json
+import requests
+
 ### DÉFINITIONS DES CLASSES :
 
 class User:
@@ -80,11 +82,16 @@ class Server:
         with open(SERVER_FILE_NAME, 'w') as fichier:
             json.dump(dic, fichier, indent=4, ensure_ascii=False)
 
+    def get_users(self):
+        return(self.users)
     def get_channels(self):
         return(self.channels)
+    def get_messages(self):
+        return(self.messages)
+    #def add_message(self, message:Message):
 
 class Interaction:
-    def __init__(self, serv : Server):
+    def __init__(self, serv:"RemoteServer"):
         self.server=serv
 
     def accueil(self):
@@ -117,22 +124,22 @@ class Interaction:
         self.accueil()
 
     def read_message(self):
-        for users in self.server.users:
+        for users in self.server.get_users():
             print(User(users.id, users.name))
         sender_id = input('quel est ton id:')
-        for groupe in self.server.channels:
+        for groupe in self.server.get_channels():
             if int(sender_id) in groupe.member_ids:
                 print(Channel(groupe.id, groupe.name, groupe.member_ids))
         groupe_a_consulter = input('Les messages de quel groupe veux-tu voir (id de groupe):')
-        for groupe in self.server.channels:
+        for groupe in self.server.get_channels():
             if groupe.id == int(groupe_a_consulter):
                 print(Channel(groupe.id, groupe.name, groupe.member_ids))
-        for mess in self.server.messages:
+        for mess in self.server.get_messages():
             #if mess['channel']== int(groupe_a_consulter):
                 #for id in mess['id']:
                 #    print 
             if mess.channel == int(groupe_a_consulter):
-                for user in self.server.users:
+                for user in self.server.get_users():
                     if user.id == mess.sender_id:
                         print(User(user.id ,user.name))
                         message = Message(mess.id, mess.sender_id, mess.channel, mess.reception_date, mess.content)
@@ -151,17 +158,17 @@ class Interaction:
            self.leave()
 
     def send_message(self):
-        for users in self.server.users:
+        for users in self.server.get_users():
             print(User(users.id, users.name))
         sender_id = input('quel est ton id:')
-        for groupe in self.server.channels:
+        for groupe in self.server.get_channels():
             if int(sender_id) in groupe.member_ids :
                 print(Channel(groupe.id, groupe.name, groupe.member_ids))
         groupe_a_contacter = input('à quel groupe veux-tu écrire (id de groupe):')
         message_a_ecrire = input('Que veux tu écrire:')
-        n_id = max([mess.id for mess in self.server.messages])+1
-        self.server.messages.append(Message(n_id,'10:55, 12/12/2024',int(sender_id),int(groupe_a_contacter),message_a_ecrire))
-        print(self.server.messages)
+        n_id = max([mess.id for mess in self.server.get_messages()])+1
+        self.server.get_messages().append(Message(n_id,'10:55, 12/12/2024',int(sender_id),int(groupe_a_contacter),message_a_ecrire))
+        print(self.server.get_messages())
         self.server.save_server()
         self.accueil()
 
@@ -187,7 +194,7 @@ class Interaction:
         
     def user_affichage(self):
         print( 'User list :')
-        for u in self.server.users:
+        for u in self.server.get_users() :
             print(User(u.id, u.name))
         print('n. Create user')
         print('x. Main menu')
@@ -245,12 +252,29 @@ class Interaction:
 
 
 class RemoteServer:
-    def __init__(self, serv: Server )
+
+    def __init__(self, url):
+        self.url=url
+
+    def get_users(self)-> list[User]:
+        response_users=requests.get(self.url+'/users')
+        response_users.json()
+        return(User(user[int("id")], user["name"]) for user in response_users)
+
+    def get_channels(self)-> list[Channel]:
+        response_channels=requests.get(self.url+'/channels')
+        response_channels.json()
+        return(Channel(channel[int("id")], channel["name"], channel["member_ids"]) for channel in response_channels)
+    def get_messages(self)-> list[Message]:
+        response_messages=requests.get(self.url+'/messages')
+        response_messages.json()
+        return(Message(mess[int("id")], mess["reception_date"], mess["sender_id"], mess["channel"], mess["content"]) for mess in response_messages)
 
 
 SERVER_FILE_NAME= 'server-data.json'
 server_as_class = Server('Messenger', [],[],[])
 server_as_class.load_server()
 
-interaction = Interaction(server_as_class)
+server_internet =RemoteServer('http://vps-cfefb063.vps.ovh.net')
+interaction = Interaction(server_internet)
 interaction.accueil()

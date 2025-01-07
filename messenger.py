@@ -1,6 +1,7 @@
 from datetime import datetime
 import json
 ### DÉFINITIONS DES CLASSES :
+
 class User:
     def __init__(self,id:int, name:str):
         self.id = id
@@ -12,7 +13,8 @@ class User:
     def to_dict(self):
         dict = {'id' : self.id, 'name' : self.name}
         return dict
-    
+
+
 class Channel:
     def __init__(self,id:int, name:str, member_ids : list):
         self.id = id
@@ -24,6 +26,7 @@ class Channel:
     def to_dict(self):
         dict = {'id' : self.id, 'name' : self.name, 'member_ids': self.member_ids}
         return dict
+
 
 class Message:
     def __init__(self, id: int, reception_date: str, sender_id: int, channel: int, content: str):
@@ -40,9 +43,6 @@ class Message:
         dict = {'id' : self.id, 'reception_date' : self.reception_date, 'sender_id': self.sender_id, 'channel': self.channel, 'content': self.content}
         return dict
 
-SERVER_FILE_NAME= 'server-data.json'
-server_as_class = Server('Messenger', [],[],[])
-server_as_class.load_server()
 
 class Server:
     def __init__(self, name:str, users: list[User], channels: list[Channel], messages: list[Message]):
@@ -79,9 +79,12 @@ class Server:
         dic['messages'] = [mess.to_dict() for mess in server_as_class.messages]
         with open(SERVER_FILE_NAME, 'w') as fichier:
             json.dump(dic, fichier, indent=4, ensure_ascii=False)
-    
+
+    def get_channels(self):
+        return(self.channels)
+
 class Interaction:
-    def __init__(self, serv : Server)
+    def __init__(self, serv : Server):
         self.server=serv
 
     def accueil(self):
@@ -106,7 +109,6 @@ class Interaction:
             print('Unknown option:', choice)
             return None
 
-
     def leave(self):
         print('Bye!')
         return None
@@ -114,141 +116,141 @@ class Interaction:
     def retour_menu(self):
         self.accueil()
 
+    def read_message(self):
+        for users in self.server.users:
+            print(User(users.id, users.name))
+        sender_id = input('quel est ton id:')
+        for groupe in self.server.channels:
+            if int(sender_id) in groupe.member_ids:
+                print(Channel(groupe.id, groupe.name, groupe.member_ids))
+        groupe_a_consulter = input('Les messages de quel groupe veux-tu voir (id de groupe):')
+        for groupe in self.server.channels:
+            if groupe.id == int(groupe_a_consulter):
+                print(Channel(groupe.id, groupe.name, groupe.member_ids))
+        for mess in self.server.messages:
+            #if mess['channel']== int(groupe_a_consulter):
+                #for id in mess['id']:
+                #    print 
+            if mess.channel == int(groupe_a_consulter):
+                for user in self.server.users:
+                    if user.id == mess.sender_id:
+                        print(User(user.id ,user.name))
+                        message = Message(mess.id, mess.sender_id, mess.channel, mess.reception_date, mess.content)
+                        print(message)
 
-### FICHIER JSON ET CONVERSION: 
+        print('----------------------')
+        print('3. Send a message')
+        print('x. Main menu')
+        choice = input('Select an option: ')
+        if choice == '3':
+            self.send_message()
+            
+        elif choice == 'x':
+            self.retour_menu()
+        else: 
+           self.leave()
 
+    def send_message(self):
+        for users in self.server.users:
+            print(User(users.id, users.name))
+        sender_id = input('quel est ton id:')
+        for groupe in self.server.channels:
+            if int(sender_id) in groupe.member_ids :
+                print(Channel(groupe.id, groupe.name, groupe.member_ids))
+        groupe_a_contacter = input('à quel groupe veux-tu écrire (id de groupe):')
+        message_a_ecrire = input('Que veux tu écrire:')
+        n_id = max([mess.id for mess in self.server.messages])+1
+        self.server.messages.append(Message(n_id,'10:55, 12/12/2024',int(sender_id),int(groupe_a_contacter),message_a_ecrire))
+        print(self.server.messages)
+        self.server.save_server()
+        self.accueil()
 
-### DÉFINTIIONS DES FONCTIONS UTILES AU SERVER:
-
-
-def user_affichage():
-    print( 'User list :')
-    for u in server_as_class.users:
-        print(User(u.id, u.name))
-    print('n. Create user')
-    print('x. Main menu')
-    choice = input('Select an option: ')
-    if choice == 'x':
-        retour_menu()
-    elif choice == 'n':
-        new_user()
-    accueil()
-
-def affichage_membre_groupe():
-    group= input('Les membres de quel groupe veux-tu afficher ?')
-    for g in server_as_class.channels:
-        if g.name == group:
-            ids= g.member_ids
-            for u in server_as_class.users:
-                if u.id in ids:
-                    print(User(u.id,u.name))
-    accueil()
-
-def add_member():
-    channel_id = input('Numéro id du groupe où ajouter:')
-    for channel in server_as_class.channels:
-        if int(channel_id)== channel.id : 
-            for user in server_as_class.users:
-                if user.id not in channel.member_ids:
-                    print(User(user.id, user.name))
-            id_to_add = input('Quel id ajouter :')
-            channel.member_ids.append(int(id_to_add))
-            print(channel)
-    accueil()
-    server_as_class.save_server()
-
-def create_channel():
-    name_group = input('Choose a name of group:')
-    for user in server_as_class.users :
-        print(User(user.id, user.name))
-    members = input('Give the ids you want in the group:')
-    liste_membres_id_str = members.split(',')
-    liste_membres_id = []
-    for id in liste_membres_id_str:
-        liste_membres_id.append(int(id)) 
-    n_id = max([c.id for c in server_as_class.channels])+1
-    server_as_class.channels.append(Channel(n_id, name_group, liste_membres_id))
-    print(Channel(n_id, name_group, liste_membres_id))
-    server_as_class.save_server()
-    accueil()
-
-def channels_affichage():
-    for c in server_as_class.channels:
-        print(Channel(c.id,c.name, c.member_ids))
-    print('c. Create channel')
-    print('a. Add a member to a channel')
-    print("l. Liste les membres d'un groupe")
-    print('x. Main menu')
-    choice = input('Select an option: ')
-    if choice == 'c':
-        create_channel()
-    elif choice == 'a':
-        add_member()
-    elif choice == 'l':
-        affichage_membre_groupe()
-    elif choice == 'x':
-        leave()
-    else:
-        print('Unknown option:', choice)
-        return None
-
-def new_user():
-    nom = input('Choisir un nom:')
-    n_id = max([u.id for u in server_as_class.users])+1
-    server_as_class.users.append(User(n_id,nom))
-    server_as_class.save_server()
-    accueil()
-
-def send_message():
-    for users in server_as_class.users:
-        print(User(users.id, users.name))
-    sender_id = input('quel est ton id:')
-    for groupe in server_as_class.channels:
-        if int(sender_id) in groupe.member_ids :
-            print(Channel(groupe.id, groupe.name, groupe.member_ids))
-    groupe_a_contacter = input('à quel groupe veux-tu écrire (id de groupe):')
-    message_a_ecrire = input('Que veux tu écrire:')
-    n_id = max([mess.id for mess in server_as_class.messages])+1
-    server_as_class.messages.append(Message(n_id,'10:55, 12/12/2024',int(sender_id),int(groupe_a_contacter),message_a_ecrire))
-    print(server_as_class.messages)
-    server_as_class.save_server()
-    accueil()
-
-def read_message():
-    for users in server_as_class.users:
-        print(User(users.id, users.name))
-    sender_id = input('quel est ton id:')
-    for groupe in server_as_class.channels:
-        if int(sender_id) in groupe.member_ids:
-            print(Channel(groupe.id, groupe.name, groupe.member_ids))
-    groupe_a_consulter = input('Les messages de quel groupe veux-tu voir (id de groupe):')
-    for groupe in server_as_class.channels:
-        if groupe.id == int(groupe_a_consulter):
-            print(Channel(groupe.id, groupe.name, groupe.member_ids))
-    for mess in server_as_class.messages:
-        #if mess['channel']== int(groupe_a_consulter):
-            #for id in mess['id']:
-            #    print 
-        if mess.channel == int(groupe_a_consulter):
-            for user in server_as_class.users:
-                if user.id == mess.sender_id:
-                    print(User(user.id ,user.name))
-                    message = Message(mess.id, mess.sender_id, mess.channel, mess.reception_date, mess.content)
-                    print(message)
-
-    print('----------------------')
-    print('3. Send a message')
-    print('x. Main menu')
-    choice = input('Select an option: ')
-    if choice == '3':
-        send_message()
+    def channels_affichage(self):
+        for c in self.server.get_channels():
+            print(Channel(c.id,c.name, c.member_ids))
+        print('c. Create channel')
+        print('a. Add a member to a channel')
+        print("l. Liste les membres d'un groupe")
+        print('x. Main menu')
+        choice = input('Select an option: ')
+        if choice == 'c':
+            self.create_channel()
+        elif choice == 'a':
+            self.add_member()
+        elif choice == 'l':
+            self.affichage_membre_groupe()
+        elif choice == 'x':
+            self.leave()
+        else:
+            print('Unknown option:', choice)
+            return None
         
-    elif choice == 'x':
-        retour_menu()
-    else: 
-        leave()
+    def user_affichage(self):
+        print( 'User list :')
+        for u in self.server.users:
+            print(User(u.id, u.name))
+        print('n. Create user')
+        print('x. Main menu')
+        choice = input('Select an option: ')
+        if choice == 'x':
+            self.retour_menu()
+        elif choice == 'n':
+            self.new_user()
+        self.accueil()
+
+    def affichage_membre_groupe(self):
+        group= input('Les membres de quel groupe veux-tu afficher ?')
+        for g in self.server.channels:
+            if g.name == group:
+                ids= g.member_ids
+                for u in self.server.users:
+                    if u.id in ids:
+                        print(User(u.id,u.name))
+        self.accueil()
+
+    def add_member(self):
+        channel_id = input('Numéro id du groupe où ajouter:')
+        for channel in self.server.channels:
+            if int(channel_id)== channel.id : 
+                for user in self.server.users:
+                    if user.id not in channel.member_ids:
+                        print(User(user.id, user.name))
+                id_to_add = input('Quel id ajouter :')
+                channel.member_ids.append(int(id_to_add))
+                print(channel)
+        self.accueil()
+        self.server.save_server()
+
+    def create_channel(self):
+        name_group = input('Choose a name of group:')
+        for user in self.server.users :
+            print(User(user.id, user.name))
+        members = input('Give the ids you want in the group:')
+        liste_membres_id_str = members.split(',')
+        liste_membres_id = []
+        for id in liste_membres_id_str:
+            liste_membres_id.append(int(id)) 
+        n_id = max([c.id for c in self.server.channels])+1
+        self.server.channels.append(Channel(n_id, name_group, liste_membres_id))
+        print(Channel(n_id, name_group, liste_membres_id))
+        self.server.save_server()
+        self.accueil()
+
+    def new_user(self):
+        nom = input('Choisir un nom:')
+        n_id = max([u.id for u in self.server.users])+1
+        self.server.users.append(User(n_id,nom))
+        self.server.save_server()
+        self.accueil()
 
 
-### ENREGISTREMENT SUR LE SERVER ET CONVERSION JSON-DICT:
-   
-accueil()
+class RemoteServer:
+    def __init__(self, serv: Server )
+
+
+SERVER_FILE_NAME= 'server-data.json'
+server_as_class = Server('Messenger', [],[],[])
+server_as_class.load_server()
+
+interaction = Interaction(server_as_class)
+interaction.accueil()

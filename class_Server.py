@@ -66,3 +66,15 @@ class Server:
                         print(User(user.id, user.name))
             channel.member_ids.append(int(id_to_add))
         self.save_server()
+
+    def channel_creation(self,name_group,members):
+        for user in self.get_users() :
+            print(User(user.id, user.name))
+        liste_membres_id_str = members.split(',')
+        liste_membres_id = []
+        for id in liste_membres_id_str:
+            liste_membres_id.append(int(id)) 
+        n_id = max([c.id for c in self.get_channels()])+1
+        self.get_channels().append(Channel(n_id, name_group, liste_membres_id))
+        print(Channel(n_id, name_group, liste_membres_id))
+        self.save_server()

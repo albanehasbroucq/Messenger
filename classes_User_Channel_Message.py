@@ -1,3 +1,4 @@
+#défintions de 3 classes :
 class User:
     def __init__(self,id:int, name:str):
         self.id = id

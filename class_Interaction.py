@@ -1,8 +1,9 @@
 from classes_User_Channel_Message import User, Channel, Message
-from class_RemoteServer import RemoteServer
+#from class_RemoteServer import RemoteServer
+#from class_LocalServer import LocalServer
 from class_Server import Server
 class Interaction:
-    def __init__(self, serv:"RemoteServer"):
+    def __init__(self, serv:"Server"):
         self.server=serv
 
     def accueil(self):
@@ -139,14 +140,17 @@ class Interaction:
     def create_channel(self):
         name_group = input('Choose a name of group:')
         members = input('Give the ids you want in the group:')
-        self.server.channel_creation(name_group, members)
+        liste_membres_id_str = members.split(',')
+        liste_membres_id = []
+        for id in liste_membres_id_str:
+            liste_membres_id.append(int(id)) 
+        self.server.channel_creation(name_group, liste_membres_id)
         # for user in self.server.get_users() :
         #     print(User(user.id, user.name))
 
-        # liste_membres_id_str = members.split(',')
-        # liste_membres_id = []
-        # for id in liste_membres_id_str:
-        #     liste_membres_id.append(int(id)) 
+        # 
+        # 
+        # 
         # n_id = max([c.id for c in self.server.get_channels()])+1
         # self.server.get_channels().append(Channel(n_id, name_group, liste_membres_id))
         # print(Channel(n_id, name_group, liste_membres_id))

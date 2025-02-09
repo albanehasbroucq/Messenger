@@ -36,26 +36,29 @@ class Interaction:
         self.accueil()
 
     def read_message(self):
-        for users in self.server.get_users():
-            print(User(users.id, users.name))
+        for user in self.server.get_users():
+            # Vous pouvez directement faire `print(user)`,
+            # pas besoin de recréer un User
+            print(user)
         sender_id = input('quel est ton id:')
         for groupe in self.server.get_channels():
             if int(sender_id) in groupe.member_ids:
-                print(Channel(groupe.id, groupe.name, groupe.member_ids))
-        groupe_a_consulter = input('Les messages de quel groupe veux-tu voir (id de groupe):')
+                print(groupe)
+        groupe_a_consulter = int(input('Les messages de quel groupe veux-tu voir (id de groupe):'))
         for groupe in self.server.get_channels():
-            if groupe.id == int(groupe_a_consulter):
-                print(Channel(groupe.id, groupe.name, groupe.member_ids))
+            if groupe.id == groupe_a_consulter:
+                print(groupe)
         for mess in self.server.get_messages():
             #if mess['channel']== int(groupe_a_consulter):
                 #for id in mess['id']:
                 #    print 
-            if mess.channel == int(groupe_a_consulter):
+            if mess.channel == groupe_a_consulter:
                 for user in self.server.get_users():
                     if user.id == mess.sender_id:
-                        print(User(user.id ,user.name))
-                        message = Message(mess.id, mess.sender_id, mess.channel, mess.reception_date, mess.content)
-                        print(message)
+                        # print(user)
+                        # print(mess)
+                        # Vous pouvez améliorer la mise en forme :
+                        print(f'{mess.reception_date} | {user.name} in {mess.channel}: {mess.content}')
 
         print('----------------------')
         print('3. Send a message')
@@ -70,20 +73,21 @@ class Interaction:
            self.leave()
 
     def send_message(self):
-        for users in self.server.get_users():
-            print(User(users.id, users.name))
-        sender_id = input('quel est ton id:')
+        for user in self.server.get_users():
+            print(user)
+        sender_id = int(input('quel est ton id:'))
         for groupe in self.server.get_channels():
             if int(sender_id) in groupe.member_ids :
-                print(Channel(groupe.id, groupe.name, groupe.member_ids))
-        groupe_a_contacter = input('à quel groupe veux-tu écrire (id de groupe):')
+                print(groupe)
+        groupe_a_contacter = int(input('à quel groupe veux-tu écrire (id de groupe):'))
         message_a_ecrire = input('Que veux tu écrire:')
         self.server.publish_message(sender_id, groupe_a_contacter, message_a_ecrire)
         self.accueil()
 
     def channels_affichage(self):
-        for c in self.server.get_channels():
-            print(Channel(c.id,c.name, c.member_ids))
+        # Evitez les noms de variables d'une lettre
+        for channel in self.server.get_channels():
+            print(channel)
         print('c. Create channel')
         print('a. Add a member to a channel')
         print("l. Liste les membres d'un groupe")
@@ -103,8 +107,8 @@ class Interaction:
         
     def user_affichage(self):
         print( 'User list :')
-        for u in self.server.get_users() :
-            print(User(u.id, u.name))
+        for user in self.server.get_users() :
+            print(user)
         print('n. Create user')
         print('x. Main menu')
         choice = input('Select an option: ')
@@ -125,8 +129,8 @@ class Interaction:
         self.accueil()
 
     def add_member(self):
-        channel_id = input('Numéro id du groupe où ajouter:')
-        id_to_add = input('Quel id ajouter :')
+        channel_id = int(input('Numéro id du groupe où ajouter:'))
+        id_to_add = int(input('Quel id ajouter :'))
         # for channel in self.server.get_channels():
         #     if int(channel_id)== channel : 
         #         for user in self.server.get_users():

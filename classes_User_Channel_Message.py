@@ -28,6 +28,8 @@ class Channel:
 class Message:
     def __init__(self, id: int, reception_date: str, sender_id: int, channel: int, content: str):
         self.id = id
+        # Pour stocker un horodatage, il vaut mieux utiliser une instance
+        # de la classe datetime (from datetime import datetime)
         self.reception_date = reception_date
         self.sender_id = sender_id
         self.channel = channel

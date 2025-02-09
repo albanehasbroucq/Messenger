@@ -11,8 +11,11 @@ class RemoteServer(Server):
 
     @override
     def get_users(self)-> list[User]:
+        # N'oubliez pas de vérifier que le code de réponse HTTP
+        # (response_users.status_code) vaut 200
         response_users=requests.get(self.url+'/users')
-        return(User(user[("id")], user["name"]) for user in response_users.json())
+        # Pour faire une liste, il faut entourer l'expression de crochets
+        return [User(user[("id")], user["name"]) for user in response_users.json()]
 
     @override
     def get_channels(self)-> list[Channel]:
@@ -28,20 +31,21 @@ class RemoteServer(Server):
     @override
     def get_messages(self)-> list[Message]:
         response_messages=requests.get(self.url+'/messages')
-        return(Message(mess[("id")], mess["reception_date"], mess["sender_id"], mess["channel_id"], mess["content"]) for mess in response_messages.json())
+        return [Message(mess[("id")], mess["reception_date"], mess["sender_id"], mess["channel_id"], mess["content"]) for mess in response_messages.json()]
     
     @override
-    def add_user(self, nom):
+    def add_user(self, nom: str) -> None:
         requests.post(self.url+'/users/create', json={"name": nom})
 
-    @override
-    def deleting_user(self,user_to_delete_id):
+    # Vous n'avez pas défini cette méthode dans la classe mère (Server),
+    # ce n'est donc pas un "override".
+    def deleting_user(self, user_to_delete_id: int) -> None:
         response=requests.delete(self.url+f'/users/{user_to_delete_id}')
         if response.status_code != 200:
             print ("Cette fonction n'est pas encore disponible")
 
     @override
-    def publish_message(self,sender_id, groupe_a_contacter, message_a_ecrire):
+    def publish_message(self,sender_id: int, groupe_a_contacter: int, message_a_ecrire: str) -> None:
         requests.post(self.url+f'/channels/{groupe_a_contacter}/messages/post', json={"sender_id": sender_id, "channel": groupe_a_contacter,"content":message_a_ecrire})
 
     @override
@@ -49,8 +53,11 @@ class RemoteServer(Server):
         requests.post(self.url+f'/channels/{channel_id}/join', json={"user_id": id_to_add})
 
     @override
-    def channel_creation(self,name_group,members):
+    def channel_creation(self, name_group: str, members: list[int]) -> None:
         requests.post(self.url+'/channels/create', json={"name": name_group})
+        # Attention, rien n'empêche 2 canaux différents d'avoir le même nom.
+        # La requête POST renvoie l'identifiant du canal nouvellement créé,
+        # vous auriez pu l'utiliser directement.
         for channel in self.get_channels():
             if channel.name == name_group:
                 id_group= channel.id

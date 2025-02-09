@@ -1,6 +1,11 @@
-from classes_User_Channel_Message import User, Channel, Message
+# Une bonne pratique est de séparer ses imports en 2 :
+# - d'abord les imports de bibliothèques
+# - puis les imports de fichiers que vous avez écrits dans votre projet
+from datetime import datetime
 import json
 from typing import override
+
+from classes_User_Channel_Message import User, Channel, Message
 from class_Server import Server
 
 class LocalServer (Server):
@@ -39,7 +44,10 @@ class LocalServer (Server):
         ## server['users']:list[dict]
         ## Transform server['users'] en list[User]
 
-        return server
+        # Si vous avez une valeur de return, il faut penser à indiquer son type
+        # dans la signature de la fonction. Ici vous n'utilisez
+        # pas le return, vous pouvez donc l'enlever.
+
     #with open('server-data.json', 'r') as fichier:
     #    server = json.load(fichier)
     @override
@@ -66,30 +74,42 @@ class LocalServer (Server):
     #def add_message(self, message:Message):
 
     @override
-    def add_user(self, nom):
+    def add_user(self, nom: str) -> None:
         n_id = max([u.id for u in self.get_users()])+1
         self.get_users().append(User(n_id,nom))
         self.save_server()
 
     @override
-    def publish_message(self,sender_id, groupe_a_contacter, message_a_ecrire):
+    # Puisque le constructeur Message.__init__ attend des int,
+    # vous pouvez spécifier que votre fonction publish_message
+    # attend également des int.
+    # Lorsque vous utilisez la fonction, vous saurez alors qu'il
+    # faut commencer par convertir les str en int.
+    def publish_message(self,sender_id: int, groupe_a_contacter: int, message_a_ecrire: str) -> None:
         n_id = max([mess.id for mess in self.get_messages()])+1
-        self.get_messages().append(Message(n_id,'10:55, 12/12/2024',int(sender_id),int(groupe_a_contacter),message_a_ecrire))
+        # Pour interagir avec des horodatages, vous pouvez utiliser le
+        # module datetime. Il possède des fonctionnalités avancées
+        # pour parser et formater des dates, mais un simple appel à
+        # str permet déjà d'obtenir un premier rendu correct.
+        self.get_messages().append(Message(n_id,str(datetime.now()), sender_id, groupe_a_contacter,message_a_ecrire))
         print(self.get_messages())
         self.save_server()
     
     @override
-    def add_member_server(self, id_to_add, channel_id):
+    def add_member_server(self, id_to_add: int, channel_id: int) -> None:
+        # Cette fonction était bugguée : elle ajoutait l'utilisateur
+        # à tous les channels
         for channel in self.get_channels():
-            if int(channel_id) == channel : 
-                for user in self.get_users():
-                    if user.id not in channel.member_ids:
-                        print(User(user.id, user.name))
-            channel.member_ids.append(int(id_to_add))
+            # Cette condition n'était jamais vraie, car channel
+            # est un Channel, et channel_id un int
+            if channel_id == channel.id:
+                if id_to_add not in channel.member_ids:
+                    # Ce append était effectué sur tous les channel
+                    channel.member_ids.append(id_to_add)
         self.save_server()
 
     @override
-    def channel_creation(self,name_group,members):
+    def channel_creation(self,name_group: str,members: list[int]) -> None:
         for user in self.get_users() :
             print(User(user.id, user.name))
         n_id = max([c.id for c in self.get_channels()])+1
